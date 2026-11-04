@@ -162,7 +162,3 @@ python manage.py runserver
 | Сценарий восстановления данных | `python scripts/backup_restore.py backup / verify / restore / check` | [backup-restore.md](docs/backup-restore.md) |
 | Автоматическая проверка чистого запуска | `bash scripts/verify_clean_start.sh` | [reproducibility.md](docs/reproducibility.md) |
 | Журнал изменений релизов | [CHANGELOG.md](CHANGELOG.md), `python scripts/release_notes.py --check` | [ci-and-releases.md](docs/ci-and-releases.md) |
-#   S P O _ S R S 8  
- #   S P O _ S R S 8  
- #   S P O _ S R S 8  
- 

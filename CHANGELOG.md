@@ -15,6 +15,7 @@
 ## [0.5.1] — 2026-11-04 — исправления по итогам повторного запуска на Windows
 ### Исправлено
 - `collectstatic` падал на Windows-клоне (`typed.umd.js.map could not be found`): Git заменял переводы строк на CRLF, и `config/storage.py` не распознавал ссылку на `.map`; ссылка теперь обрезается `strip()`.
+- `backup_restore.py backup` на Windows падал с `UnicodeDecodeError`: `dumpdata` писал копию в системной кодировке cp1251; дочерние процессы теперь запускаются в режиме UTF-8 (`PYTHONUTF8=1`), копия всегда в UTF-8 и переносится между ОС; убрана полоса прогресса `dumpdata`.
 ### Добавлено
 - `.gitattributes`: `static/` хранится байт-в-байт, `*.sh` — с LF.
 - `docs/troubleshooting.md`: ошибки 11 (CRLF и `collectstatic`) и 12 (заглушка Python из Microsoft Store).

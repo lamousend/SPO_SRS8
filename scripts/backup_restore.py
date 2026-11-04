@@ -35,9 +35,18 @@ TRACKED = ['auth.user', 'auth.group', 'accounts.category', 'accounts.ticket',
            'accounts.studentprofile', 'dashboards.activityevent']
 
 
+def utf8_env(env=None):
+    """Окружение для дочерних процессов с режимом UTF-8 Python (PEP 540).
+
+    В Windows dumpdata/loaddata иначе пишут и читают файл в системной кодировке
+    (cp1251), копия получается непереносимой и не читается как UTF-8.
+    """
+    return dict(env if env is not None else os.environ, PYTHONUTF8='1')
+
+
 def manage(*args, env=None, quiet=False):
     return subprocess.run([sys.executable, str(ROOT / 'manage.py'), *args], cwd=ROOT,
-                          env=env, check=False,
+                          env=utf8_env(env), check=False,
                           stdout=subprocess.DEVNULL if quiet else None)
 
 
@@ -122,7 +131,8 @@ def database_is_empty():
 def cmd_backup(target):
     target = Path(target) if target else ROOT / 'backups' / f'data-{datetime.now():%Y%m%d-%H%M%S}.json'
     target.parent.mkdir(parents=True, exist_ok=True)
-    args = ['dumpdata', '--natural-foreign', '--natural-primary', '--indent', '2', '--output', str(target)]
+    args = ['dumpdata', '--natural-foreign', '--natural-primary', '--indent', '2',
+            '--verbosity', '0', '--output', str(target)]
     for item in EXCLUDE:
         args += ['--exclude', item]
     if manage(*args).returncode:
@@ -142,7 +152,8 @@ def cmd_restore(source, force=False):
     if manage('loaddata', str(source)).returncode:
         return 1
     # проверка выполняется отдельным процессом, чтобы прочитать уже сохранённые данные
-    return subprocess.run([sys.executable, __file__, 'check', str(source)], cwd=ROOT).returncode
+    return subprocess.run([sys.executable, __file__, 'check', str(source)], cwd=ROOT,
+                          env=utf8_env()).returncode
 
 
 def cmd_verify(source):
@@ -154,7 +165,8 @@ def cmd_verify(source):
         print(f'загрузка копии {source}')
         if manage('loaddata', str(source), env=env).returncode:
             return 1
-        return subprocess.run([sys.executable, __file__, 'check', str(source)], cwd=ROOT, env=env).returncode
+        return subprocess.run([sys.executable, __file__, 'check', str(source)], cwd=ROOT,
+                              env=utf8_env(env)).returncode
 
 
 def main(argv):
