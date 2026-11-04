@@ -88,7 +88,7 @@ for md in markdown_files:
 # 6. покрытие маршрутов карточками
 if (ROOT / 'docs/api-reference.md').is_file() and (ROOT / 'docs/api.md').is_file():
     api_text = read('docs/api.md')
-    for url in sorted(set(re.findall(r'\| `(/api/[^`]+)` \|', read('docs/api-reference.md')))):
+    for url in sorted(set(re.findall(r'^\| [A-Z]+ \| (/api/\S+) \|', read('docs/api-reference.md'), flags=re.M))):
         short = url.replace('{pk}', '{id}')
         if url not in api_text and short not in api_text:
             fail(f'маршрут {url} не описан в docs/api.md')
@@ -111,7 +111,7 @@ if (ROOT / 'docs/openapi.json').is_file():
     try:
         spec = json.loads(read('docs/openapi.json'))
         documented = set(spec.get('paths', {}))
-        referenced = set(re.findall(r'\| `(/api/[^`]+)` \|', read('docs/api-reference.md')))
+        referenced = set(re.findall(r'^\| [A-Z]+ \| (/api/\S+) \|', read('docs/api-reference.md'), flags=re.M))
         if spec.get('openapi', '').split('.')[0] != '3':
             fail('docs/openapi.json: не OpenAPI 3')
         if documented != referenced:

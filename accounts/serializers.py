@@ -36,7 +36,7 @@ class TicketSerializer(serializers.ModelSerializer):
             "title": {"help_text": "название, не короче 5 символов"},
             "description": {"help_text": "описание"},
             "category": {"help_text": "id категории"},
-            "status": {"help_text": "статус; при создании только new, далее new -> progress -> done"},
+            "status": {"help_text": "статус: при создании new, затем progress, затем done"},
             "created_at": {"help_text": "дата создания"},
         }
 

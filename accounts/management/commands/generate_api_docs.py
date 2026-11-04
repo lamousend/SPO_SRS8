@@ -153,7 +153,7 @@ def collect():
                 'handler': f'{view_class.__name__}.{action}',
                 'serializer': initkwargs.get('serializer_class') or view_class.serializer_class,
                 'summary': (ACTION_TITLES.get(action) if action in STANDARD else None)
-                           or first_line(handler.__doc__).rstrip('.').replace(' -> ', ' → ') or action,
+                           or first_line(handler.__doc__).rstrip('.').replace(' -> ', ' - ') or action,
                 'is_list': action == 'list' or (action not in STANDARD and method == 'get'),
                 'has_body': action in ('create', 'update', 'partial_update'),
                 'detail': '{id}' in path_template(pattern),
@@ -267,10 +267,9 @@ def render_reference(routes):
     lines = [
         '# Справочник REST API (создан автоматически)',
         '',
-        '> Файл и машиночитаемая схема [openapi.json](openapi.json) создаются командой',
-        '> `python manage.py generate_api_docs` из реальных маршрутов, сериализаторов и',
-        '> моделей проекта. Вручную не редактируются; карточки методов с примерами -',
-        '> в [api.md](api.md).',
+        'Файл создается автоматически командой',
+        'python manage.py generate_api_docs из реальных маршрутов, сериализаторов и',
+        'моделей проекта. Вручную не редактируется.',
         '',
         '## Маршруты',
         '',
@@ -278,15 +277,15 @@ def render_reference(routes):
         '|-------|-----|------------|----------|-------|---------------|',
     ]
     for r in routes:
-        lines.append(f"| {r['method'].upper()} | `{r['url']}` | `{r['handler']}` | {r['summary']} | "
+        lines.append(f"| {r['method'].upper()} | {r['url']} | {r['handler']} | {r['summary']} | "
                      f"{SUCCESS.get(r['action'], '200')} | {permission_names(r['view'])} |")
     lines += ['', 'Все маршруты требуют входа в систему (сессия Django); изменяющие запросы - '
-              'заголовок `X-CSRFToken`.', '', '## Параметры отбора', '',
+              'заголовок X-CSRFToken.', '', '## Параметры отбора', '',
               '| URL | Параметр | Тип | Описание |', '|-----|----------|-----|----------|']
     for r in routes:
         if r['action'] == 'list':
             for pname, (ptype, pdesc) in getattr(r['view'], 'api_query_params', {}).items():
-                lines.append(f"| `{r['url']}` | `{pname}` | {ptype} | {pdesc} |")
+                lines.append(f"| {r['url']} | {pname} | {ptype} | {pdesc} |")
     lines += ['', '## Поля данных', '']
     seen = []
     for r in routes:
@@ -295,9 +294,9 @@ def render_reference(routes):
     for ser in seen:
         _, _, rows = describe_serializer(ser)
         model = getattr(ser.Meta, 'model', None)
-        lines += [f'### {schema_name(ser)}' + (f' (модель `{model.__name__}`)' if model else ''), '',
+        lines += [f'### {schema_name(ser)}' + (f' (модель {model.__name__})' if model else ''), '',
                   '| Поле | Тип | В запросе | Описание |', '|------|-----|-----------|----------|']
-        lines += [f'| `{n}` | {t} | {req} | {d} |' for n, t, req, d in rows]
+        lines += [f'| {n} | {t} | {req} | {d} |' for n, t, req, d in rows]
         lines.append('')
     return '\n'.join(lines)
 
