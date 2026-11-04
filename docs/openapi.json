@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "SPO_SRS8 REST API",
-    "version": "0.5.1",
+    "version": "0.5.0",
     "description": "Заявки и бронирование оборудования. Создано командой python manage.py generate_api_docs - вручную не редактировать."
   },
   "servers": [
