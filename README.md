@@ -143,3 +143,5 @@ seed_lab_data создает 3 категории, 3 вида оборудова
 | Резервная копия и восстановление | python scripts/backup_restore.py backup / verify / restore / check | [backup-restore.md](docs/backup-restore.md) |
 | Проверка запуска с нуля | bash scripts/verify_clean_start.sh | [reproducibility.md](docs/reproducibility.md) |
 | Журнал изменений | python scripts/release_notes.py --check | [CHANGELOG.md](CHANGELOG.md) |
+#   S P O _ S R S 8  
+ 
