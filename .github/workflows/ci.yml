@@ -1,0 +1,143 @@
+name: CI
+
+# Проверка кода и документации на каждый push и pull request.
+# Те же шаги локально: bash scripts/ci_local.sh
+on:
+  push:
+    branches: ["**"]
+    tags: ["v*"]
+  pull_request:
+
+env:
+  # Только для CI: фиктивные значения, реальных секретов в репозитории нет.
+  DJANGO_SECRET_KEY: ci-only-not-a-real-secret-0123456789-abcdefghijklmnopqrstuvwxyz
+  DJANGO_DEBUG: "false"
+  DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+
+jobs:
+  docs-and-sqlite:
+    name: Документация и тесты (SQLite, Python ${{ matrix.python }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+
+      - name: Установка зависимостей из requirements.txt
+        run: python -m pip install -r requirements.txt
+
+      - name: Проверка конфигурации Django
+        run: python manage.py check
+
+      - name: Миграции согласованы с моделями
+        run: python manage.py makemigrations --check --dry-run
+
+      - name: Автотесты API и контрактные тесты OpenAPI
+        run: python manage.py test accounts
+
+      - name: Сборка статики (как в build.sh)
+        run: python manage.py collectstatic --noinput
+
+      - name: Описание API (api-reference.md, openapi.json) актуально
+        run: python manage.py generate_api_docs --check
+
+      - name: Комплект документации
+        run: python scripts/check_docs.py
+
+      - name: Журнал изменений релизов
+        run: python scripts/release_notes.py --check
+
+      - name: Резервная копия и проверка восстановления
+        run: |
+          python manage.py migrate --noinput
+          python manage.py seed_lab_data --password "ci-only-password"
+          python scripts/backup_restore.py backup backups/ci.json
+          python scripts/backup_restore.py verify backups/ci.json
+
+      - name: Чистый запуск по документации
+        run: bash scripts/verify_clean_start.sh --skip-install
+
+  postgres:
+    name: PostgreSQL 16 (как на Render)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci-only-password
+          POSTGRES_DB: ci
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U ci"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      PG_BASE: postgresql://ci:ci-only-password@localhost:5432
+      PGPASSWORD: ci-only-password
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Установка зависимостей из requirements.txt
+        run: python -m pip install -r requirements.txt
+
+      - name: Отдельные базы для проверок
+        run: |
+          psql -h localhost -U ci -d ci -c "CREATE DATABASE app;"
+          psql -h localhost -U ci -d ci -c "CREATE DATABASE verify;"
+          psql -h localhost -U ci -d ci -c "CREATE DATABASE restored;"
+
+      - name: Миграции и автотесты на PostgreSQL
+        env:
+          DATABASE_URL: ${{ env.PG_BASE }}/app
+        run: |
+          python manage.py migrate --noinput
+          python manage.py showmigrations | (! grep -F "[ ]")
+          python manage.py test accounts
+
+      - name: Чистый запуск по документации на PostgreSQL
+        env:
+          VERIFY_DATABASE_URL: ${{ env.PG_BASE }}/verify
+        run: bash scripts/verify_clean_start.sh --skip-install
+
+      - name: Перенос данных SQLite -> PostgreSQL
+        run: |
+          python manage.py migrate --noinput
+          python manage.py seed_lab_data --password "ci-only-password"
+          python scripts/backup_restore.py backup backups/transfer.json
+          DATABASE_URL="$PG_BASE/restored" python manage.py migrate --noinput
+          DATABASE_URL="$PG_BASE/restored" python scripts/backup_restore.py restore backups/transfer.json
+
+  release:
+    name: GitHub Release по тегу
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [docs-and-sqlite, postgres]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Тег совпадает с последней версией CHANGELOG.md
+        run: python scripts/release_notes.py "$GITHUB_REF_NAME" --tag > release-notes.md
+
+      - name: Создание выпуска с текстом из журнала
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --notes-file release-notes.md

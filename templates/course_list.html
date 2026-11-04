@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Курсы{% endblock %}
+{% block pretitle %}<span class="crumbs"><a href="/profile/">учебные данные</a> › курсы</span>{% endblock %}
+{% block page_title %}Курсы{% endblock %}
+
+{% block page_actions %}
+    {% if is_methodist %}
+        <a class="btn btn-primary" href="/courses/add/">
+            <i class="ti ti-plus icon"></i><span class="d-none d-sm-inline">Добавить курс</span>
+        </a>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+{% include 'components/filter_chips.html' with items=departments current=current_department total=courses|length %}
+
+{% for course in courses %}
+    <div class="list-row">
+        <div class="list-row-icon"><i class="ti ti-book"></i></div>
+        <div class="list-row-main">
+            <div class="fw-bold">{{ course.title }}</div>
+            <div class="list-row-sub">{{ course.department.name }}</div>
+        </div>
+        <div class="list-row-meta list-row-sub d-none d-md-block">
+            <div>{{ course.description|default:"Без описания"|truncatechars:60 }}</div>
+            <div>Студентов: {{ course.students_n }}</div>
+        </div>
+        {% if is_methodist %}
+            <div class="d-flex gap-2">
+                <a class="btn-square" href="/courses/{{ course.id }}/edit/" title="Изменить"><i class="ti ti-pencil"></i></a>
+                <a class="btn-square text-danger" href="/courses/{{ course.id }}/delete/" title="Удалить"><i class="ti ti-trash"></i></a>
+            </div>
+        {% endif %}
+    </div>
+{% empty %}
+    <div class="card">
+        <div class="empty">
+            <div class="empty-icon"><i class="ti ti-book"></i></div>
+            <p class="empty-title">Курсов пока нет</p>
+        </div>
+    </div>
+{% endfor %}
+{% endblock %}

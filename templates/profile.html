@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static dashboard_ui %}
+
+{% block title %}Профиль{% endblock %}
+{% block pretitle %}<span class="text-ink">личный кабинет</span>{% endblock %}
+{% block page_title %}<span class="text-sky">Профиль</span>{% endblock %}
+
+{% block content %}
+<div class="row row-cards">
+    <div class="col-12 col-lg-7">
+        <div class="swatch swatch-sky hero-swatch h-100">
+            <div class="text-center my-auto py-4">
+                <div class="swatch-label mb-2">добро пожаловать</div>
+                <div class="swatch-big">{{ user.username }}</div>
+                <div class="mt-3">
+                    {% if is_methodist %}роль: методист{% else %}роль: пользователь{% endif %}
+                </div>
+            </div>
+
+            <div class="swatch-corners">
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="/courses/" class="swatch-pill">Открыть курсы</a>
+                    <a href="/dashboards/" class="swatch-pill">Дашборды</a>
+                </div>
+                <span class="swatch-label text-end d-none d-sm-inline">
+                    {% if is_methodist %}можно добавлять, изменять<br>и удалять учебные данные
+                    {% else %}доступен просмотр<br>учебных данных{% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-lg-5">
+        <div class="row row-cards h-100">
+            <div class="col-12 col-md-4 col-lg-12">
+                <a href="/departments/" class="swatch swatch-ice h-100">
+                    <span class="swatch-label">факультеты</span>
+                    <div class="swatch-num mt-auto pt-3">{{ departments_count }}</div>
+                </a>
+            </div>
+            <div class="col-12 col-md-4 col-lg-12">
+                <a href="/groups/" class="swatch swatch-cloud h-100">
+                    <span class="swatch-label">учебные группы</span>
+                    <div class="swatch-num mt-auto pt-3">{{ groups_count }}</div>
+                </a>
+            </div>
+            <div class="col-12 col-md-4 col-lg-12">
+                <a href="/courses/" class="swatch swatch-charcoal h-100">
+                    <span class="swatch-label">курсы</span>
+                    <div class="swatch-num mt-auto pt-3">{{ courses_count }}</div>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row row-cards mt-0">
+    <div class="col-12 col-md-6">{% chart_card 'courses' 'Курсы по факультетам' 'donut' %}</div>
+    <div class="col-12 col-md-6">{% chart_card 'groups' 'Учебные группы по факультетам' 'hbar' %}</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'core/dist/libs/apexcharts/dist/apexcharts.min.js' %}"></script>
+{{ charts|json_script:"charts" }}
+<script src="{% static 'js/dashboard.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}Учебные группы{% endblock %}
+{% block pretitle %}<span class="crumbs"><a href="/profile/">учебные данные</a> › учебные группы</span>{% endblock %}
+{% block page_title %}Учебные группы{% endblock %}
+
+{% block page_actions %}
+    {% if is_methodist %}
+        <a class="btn btn-primary" href="/groups/add/">
+            <i class="ti ti-plus icon"></i><span class="d-none d-sm-inline">Добавить группу</span>
+        </a>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+{% include 'components/filter_chips.html' with items=departments current=current_department total=groups|length %}
+
+{% for group in groups %}
+    <div class="list-row">
+        <div class="list-row-icon"><i class="ti ti-users-group"></i></div>
+        <div class="list-row-main">
+            <div class="fw-bold">{{ group.name }}</div>
+            <div class="list-row-sub">{{ group.department.name }}</div>
+        </div>
+        <div class="list-row-meta list-row-sub d-none d-md-block">
+            Студентов: {{ group.students_n }}
+        </div>
+        {% if is_methodist %}
+            <div class="d-flex gap-2">
+                <a class="btn-square" href="/groups/{{ group.id }}/edit/" title="Изменить"><i class="ti ti-pencil"></i></a>
+                <a class="btn-square text-danger" href="/groups/{{ group.id }}/delete/" title="Удалить"><i class="ti ti-trash"></i></a>
+            </div>
+        {% endif %}
+    </div>
+{% empty %}
+    <div class="card">
+        <div class="empty">
+            <div class="empty-icon"><i class="ti ti-users-group"></i></div>
+            <p class="empty-title">Учебных групп пока нет</p>
+        </div>
+    </div>
+{% endfor %}
+{% endblock %}

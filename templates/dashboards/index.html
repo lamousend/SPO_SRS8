@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}Дашборды{% endblock %}
+{% block pretitle %}<span class="crumbs"><a href="/profile/">учебные данные</a> › дашборды</span>{% endblock %}
+{% block page_title %}Дашборды{% endblock %}
+
+{% block content %}
+<div class="row row-cards">
+    {% for dashboard, summary in dashboards %}
+        <div class="col-12 col-md-6 col-xl-4">
+            <a href="{% url 'dashboard_page' dashboard.slug %}"
+               class="swatch {% cycle 'swatch-sky' 'swatch-cloud' 'swatch-charcoal' %} h-100 gap-3">
+                <div class="swatch-corners">
+                    <span class="swatch-label">дашборд {{ forloop.counter }}</span>
+                    <i class="ti ti-{{ dashboard.icon }} fs-1"></i>
+                </div>
+                <h2 class="mb-0 text-reset">{{ dashboard.title|lower }}</h2>
+                <div class="opacity-75">{{ dashboard.description }}</div>
+                <div class="d-flex justify-content-between mt-auto pt-4">
+                    {% for label, value in summary %}
+                        <div>
+                            <div class="swatch-num text-start">{{ value }}</div>
+                            <div class="swatch-label">{{ label }}</div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </a>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

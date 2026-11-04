@@ -1,0 +1,49 @@
+{% extends 'dashboards/base_dashboard.html' %}
+{% load dashboard_ui %}
+
+{% block widgets %}
+<div class="row row-cards">
+    <div class="col-6 col-lg-3">{% kpi_card 'Входов на сайт' 'login' data.kpis.logins %}</div>
+    <div class="col-6 col-lg-3">{% kpi_card 'Активных пользователей' 'user-check' data.kpis.active %}</div>
+    <div class="col-6 col-lg-3">{% kpi_card 'Изменений данных' 'pencil' data.kpis.changes %}</div>
+    <div class="col-6 col-lg-3">{% kpi_card 'Последнее событие' 'clock' data.kpis.last %}</div>
+
+    <div class="col-12">
+        {% chart_card 'timeline' 'Динамика активности' 'column' 'входы и изменения учебных данных' height=280 %}
+    </div>
+    <div class="col-12 col-xl-7">
+        {% chart_card 'heatmap' 'Активность по дням недели и часам' 'heatmap' 'число событий, время московское, шаг 2 часа' %}
+    </div>
+    <div class="col-12 col-md-6 col-xl-5">
+        {% chart_card 'sections' 'Изменения по разделам' 'donut' 'добавление, изменение, удаление' %}
+    </div>
+    <div class="col-12 col-md-6 col-xl-5">
+        {% chart_card 'top_users' 'Самые активные пользователи' 'hbar' 'число событий за период' height=320 %}
+    </div>
+    <div class="col-12 col-xl-7">
+        <div class="card" style="height: 28rem">
+            <div class="card-header">
+                <div>
+                    <h3 class="card-title">Последние события</h3>
+                    <p class="card-subtitle">с учётом фильтров</p>
+                </div>
+            </div>
+            <div class="card-body card-body-scrollable card-body-scrollable-shadow">
+                <div class="divide-y">
+                    {% for item in data.feed %}
+                        <div class="row">
+                            <div class="col-auto"><span class="avatar">{{ item.user|slice:':2'|upper }}</span></div>
+                            <div class="col">
+                                <div class="text-truncate"><strong>{{ item.user }}</strong> <i class="ti ti-{{ item.icon }}"></i> {{ item.text }}</div>
+                                <div class="text-secondary">{% if item.object %}{{ item.object }} · {% endif %}{{ item.ago }}</div>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="text-secondary">Событий нет</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

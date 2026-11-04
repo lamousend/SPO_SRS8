@@ -1,0 +1,10 @@
+<div class="card h-100">
+    <div class="card-body">
+        <div class="d-flex align-items-center">
+            <div class="subheader">{{ label }}</div>
+            <i class="ti ti-{{ icon }} fs-2 text-secondary ms-auto"></i>
+        </div>
+        <div class="{% if is_number %}h1{% else %}h3{% endif %} mt-2 mb-1">{{ item.value }}{{ item.suffix }}</div>
+        <div class="text-secondary">{{ item.hint }}</div>
+    </div>
+</div>

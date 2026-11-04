@@ -1,0 +1,47 @@
+{% load l10n %}
+<div class="card h-100">
+    <div class="card-header">
+        <h3 class="card-title">{{ title }}</h3>
+        <div class="card-actions">
+            <a class="btn btn-sm" href="{% url 'dashboard_export' slug %}?{{ query }}">
+                <i class="ti ti-download icon"></i>CSV
+            </a>
+        </div>
+    </div>
+    <div class="table-responsive" id="table-{{ slug }}" data-table>
+        <table class="table table-vcenter card-table">
+            <thead>
+            <tr>
+                {% for key, label in columns %}
+                    <th><button class="table-sort" data-sort="sort-{{ key }}">{{ label }}</button></th>
+                {% endfor %}
+            </tr>
+            </thead>
+            <tbody class="table-tbody">
+            {% for row in rows %}
+                <tr>
+                    {% for key, value in row %}
+                        <td class="sort-{{ key }}" data-sort="{{ value|unlocalize }}">
+                            {% if key == 'share' %}
+                                <div class="row align-items-center">
+                                    <div class="col-auto">{{ value }}%</div>
+                                    <div class="col">
+                                        <div class="progress progress-sm">
+                                            <div class="progress-bar" style="width: {{ value|unlocalize }}%">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% else %}
+                                {{ value }}
+                            {% endif %}
+                        </td>
+                    {% endfor %}
+                </tr>
+            {% empty %}
+                <tr><td colspan="{{ columns|length }}" class="text-secondary">Нет данных</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

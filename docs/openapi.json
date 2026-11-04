@@ -1,0 +1,1419 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "SPO_SRS8 REST API",
+    "version": "0.5.1",
+    "description": "Заявки и бронирование оборудования. Создано командой python manage.py generate_api_docs - вручную не редактировать."
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:8000",
+      "description": "локальный запуск"
+    },
+    {
+      "url": "https://your-app.onrender.com",
+      "description": "Render (подставьте свой домен)"
+    }
+  ],
+  "security": [
+    {
+      "sessionCookie": []
+    }
+  ],
+  "paths": {
+    "/api/categories/": {
+      "get": {
+        "operationId": "CategoryViewSet_list",
+        "summary": "список объектов",
+        "tags": [
+          "categories"
+        ],
+        "x-handler": "CategoryViewSet.list",
+        "responses": {
+          "200": {
+            "description": "успешно",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Category"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "нет входа в систему или не передан CSRF-токен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/categories/{id}/": {
+      "get": {
+        "operationId": "CategoryViewSet_retrieve",
+        "summary": "получение объекта",
+        "tags": [
+          "categories"
+        ],
+        "x-handler": "CategoryViewSet.retrieve",
+        "responses": {
+          "200": {
+            "description": "успешно",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Category"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "нет входа в систему или не передан CSRF-токен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "объект не найден, удалён или принадлежит другому пользователю",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ]
+      }
+    },
+    "/api/equipment/": {
+      "get": {
+        "operationId": "EquipmentViewSet_list",
+        "summary": "список объектов",
+        "tags": [
+          "equipment"
+        ],
+        "x-handler": "EquipmentViewSet.list",
+        "responses": {
+          "200": {
+            "description": "успешно",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Equipment"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "нет входа в систему или не передан CSRF-токен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/equipment/{id}/": {
+      "get": {
+        "operationId": "EquipmentViewSet_retrieve",
+        "summary": "получение объекта",
+        "tags": [
+          "equipment"
+        ],
+        "x-handler": "EquipmentViewSet.retrieve",
+        "responses": {
+          "200": {
+            "description": "успешно",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Equipment"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "нет входа в систему или не передан CSRF-токен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "объект не найден, удалён или принадлежит другому пользователю",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ]
+      }
+    },
+    "/api/reservations/": {
+      "get": {
+        "operationId": "ReservationViewSet_list",
+        "summary": "список объектов",
+        "tags": [
+          "reservations"
+        ],
+        "x-handler": "ReservationViewSet.list",
+        "responses": {
+          "200": {
+            "description": "успешно",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EquipmentReservation"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "данные не прошли проверку или недопустимый переход состояния",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "нет входа в систему или не передан CSRF-токен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "description": "состояние: created, issued или returned",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "equipment",
+            "in": "query",
+            "required": false,
+            "description": "id оборудования; нечисловое или 0 - ошибка 400",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ]
+      },
+      "post": {
+        "operationId": "ReservationViewSet_create",
+        "summary": "создание объекта",
+        "tags": [
+          "reservations"
+        ],
+        "x-handler": "ReservationViewSet.create",
+        "responses": {
+          "201": {
+            "description": "успешно",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EquipmentReservation"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "данные не прошли проверку или недопустимый переход состояния",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "нет входа в систему или не передан CSRF-токен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EquipmentReservationInput"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ]
+      }
+    },
+    "/api/reservations/{id}/": {
+      "get": {
+        "operationId": "ReservationViewSet_retrieve",
+        "summary": "получение объекта",
+        "tags": [
+          "reservations"
+        ],
+        "x-handler": "ReservationViewSet.retrieve",
+        "responses": {
+          "200": {
+            "description": "успешно",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EquipmentReservation"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "нет входа в систему или не передан CSRF-токен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "объект не найден, удалён или принадлежит другому пользователю",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ]
+      },
+      "put": {
+        "operationId": "ReservationViewSet_update",
+        "summary": "полное изменение",
+        "tags": [
+          "reservations"
+        ],
+        "x-handler": "ReservationViewSet.update",
+        "responses": {
+          "200": {
+            "description": "успешно",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EquipmentReservation"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "данные не прошли проверку или недопустимый переход состояния",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "нет входа в систему или не передан CSRF-токен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "объект не найден, удалён или принадлежит другому пользователю",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EquipmentReservationInput"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ]
+      },
+      "patch": {
+        "operationId": "ReservationViewSet_partial_update",
+        "summary": "частичное изменение",
+        "tags": [
+          "reservations"
+        ],
+        "x-handler": "ReservationViewSet.partial_update",
+        "responses": {
+          "200": {
+            "description": "успешно",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EquipmentReservation"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "данные не прошли проверку или недопустимый переход состояния",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "нет входа в систему или не передан CSRF-токен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "объект не найден, удалён или принадлежит другому пользователю",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/EquipmentReservationInput"
+                  }
+                ],
+                "description": "передаются только изменяемые поля"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "ReservationViewSet_destroy",
+        "summary": "удаление",
+        "tags": [
+          "reservations"
+        ],
+        "x-handler": "ReservationViewSet.destroy",
+        "responses": {
+          "204": {
+            "description": "выполнено, тело ответа пустое"
+          },
+          "400": {
+            "description": "данные не прошли проверку или недопустимый переход состояния",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "нет входа в систему или не передан CSRF-токен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "объект не найден, удалён или принадлежит другому пользователю",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ]
+      }
+    },
+    "/api/reservations/{id}/history/": {
+      "get": {
+        "operationId": "ReservationViewSet_history",
+        "summary": "История событий бронирования по возрастанию времени",
+        "tags": [
+          "reservations"
+        ],
+        "x-handler": "ReservationViewSet.history",
+        "responses": {
+          "200": {
+            "description": "успешно",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReservationEvent"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "нет входа в систему или не передан CSRF-токен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "объект не найден, удалён или принадлежит другому пользователю",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ]
+      }
+    },
+    "/api/reservations/{id}/issue/": {
+      "post": {
+        "operationId": "ReservationViewSet_issue",
+        "summary": "Выдать оборудование: created → issued, остаток уменьшается (транзакция)",
+        "tags": [
+          "reservations"
+        ],
+        "x-handler": "ReservationViewSet.issue",
+        "responses": {
+          "200": {
+            "description": "успешно",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EquipmentReservation"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "данные не прошли проверку или недопустимый переход состояния",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "нет входа в систему или не передан CSRF-токен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "объект не найден, удалён или принадлежит другому пользователю",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ]
+      }
+    },
+    "/api/reservations/{id}/return_equipment/": {
+      "post": {
+        "operationId": "ReservationViewSet_return_equipment",
+        "summary": "Вернуть оборудование: issued → returned, остаток увеличивается (транзакция)",
+        "tags": [
+          "reservations"
+        ],
+        "x-handler": "ReservationViewSet.return_equipment",
+        "responses": {
+          "200": {
+            "description": "успешно",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EquipmentReservation"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "данные не прошли проверку или недопустимый переход состояния",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "нет входа в систему или не передан CSRF-токен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "объект не найден, удалён или принадлежит другому пользователю",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ]
+      }
+    },
+    "/api/tickets/": {
+      "get": {
+        "operationId": "TicketViewSet_list",
+        "summary": "список объектов",
+        "tags": [
+          "tickets"
+        ],
+        "x-handler": "TicketViewSet.list",
+        "responses": {
+          "200": {
+            "description": "успешно",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Ticket"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "нет входа в систему или не передан CSRF-токен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "description": "статус: new, progress или done",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "post": {
+        "operationId": "TicketViewSet_create",
+        "summary": "создание объекта",
+        "tags": [
+          "tickets"
+        ],
+        "x-handler": "TicketViewSet.create",
+        "responses": {
+          "201": {
+            "description": "успешно",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Ticket"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "данные не прошли проверку или недопустимый переход состояния",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "нет входа в систему или не передан CSRF-токен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TicketInput"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ]
+      }
+    },
+    "/api/tickets/{id}/": {
+      "get": {
+        "operationId": "TicketViewSet_retrieve",
+        "summary": "получение объекта",
+        "tags": [
+          "tickets"
+        ],
+        "x-handler": "TicketViewSet.retrieve",
+        "responses": {
+          "200": {
+            "description": "успешно",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Ticket"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "нет входа в систему или не передан CSRF-токен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "объект не найден, удалён или принадлежит другому пользователю",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ]
+      },
+      "put": {
+        "operationId": "TicketViewSet_update",
+        "summary": "полное изменение",
+        "tags": [
+          "tickets"
+        ],
+        "x-handler": "TicketViewSet.update",
+        "responses": {
+          "200": {
+            "description": "успешно",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Ticket"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "данные не прошли проверку или недопустимый переход состояния",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "нет входа в систему или не передан CSRF-токен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "объект не найден, удалён или принадлежит другому пользователю",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TicketInput"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ]
+      },
+      "patch": {
+        "operationId": "TicketViewSet_partial_update",
+        "summary": "частичное изменение",
+        "tags": [
+          "tickets"
+        ],
+        "x-handler": "TicketViewSet.partial_update",
+        "responses": {
+          "200": {
+            "description": "успешно",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Ticket"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "данные не прошли проверку или недопустимый переход состояния",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "нет входа в систему или не передан CSRF-токен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "объект не найден, удалён или принадлежит другому пользователю",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/TicketInput"
+                  }
+                ],
+                "description": "передаются только изменяемые поля"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "TicketViewSet_destroy",
+        "summary": "удаление",
+        "tags": [
+          "tickets"
+        ],
+        "x-handler": "TicketViewSet.destroy",
+        "responses": {
+          "204": {
+            "description": "выполнено, тело ответа пустое"
+          },
+          "400": {
+            "description": "данные не прошли проверку или недопустимый переход состояния",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "нет входа в систему или не передан CSRF-токен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "объект не найден, удалён или принадлежит другому пользователю",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "security": [
+          {
+            "sessionCookie": [],
+            "csrfToken": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Category": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "идентификатор",
+            "readOnly": true
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 150,
+            "description": "название категории"
+          }
+        }
+      },
+      "CategoryInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 150,
+            "description": "название категории"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "Equipment": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "идентификатор",
+            "readOnly": true
+          },
+          "name": {
+            "type": "string",
+            "description": "название оборудования",
+            "readOnly": true
+          },
+          "total_q": {
+            "type": "integer",
+            "description": "общее количество",
+            "readOnly": true
+          },
+          "available_q": {
+            "type": "integer",
+            "description": "доступный остаток",
+            "readOnly": true
+          }
+        }
+      },
+      "EquipmentInput": {
+        "type": "object",
+        "properties": {}
+      },
+      "EquipmentReservation": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "идентификатор",
+            "readOnly": true
+          },
+          "purpose": {
+            "type": "string",
+            "maxLength": 150,
+            "description": "назначение, не короче 5 символов"
+          },
+          "equipment": {
+            "type": "integer",
+            "description": "id оборудования"
+          },
+          "equipment_name": {
+            "type": "string",
+            "description": "название оборудования",
+            "readOnly": true
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "количество, больше нуля"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "created",
+              "issued",
+              "returned"
+            ],
+            "description": "состояние; меняется только операциями issue и return_equipment",
+            "readOnly": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "дата создания",
+            "readOnly": true
+          }
+        }
+      },
+      "EquipmentReservationInput": {
+        "type": "object",
+        "properties": {
+          "purpose": {
+            "type": "string",
+            "maxLength": 150,
+            "description": "назначение, не короче 5 символов"
+          },
+          "equipment": {
+            "type": "integer",
+            "description": "id оборудования"
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "количество, больше нуля"
+          }
+        },
+        "required": [
+          "purpose",
+          "equipment",
+          "quantity"
+        ]
+      },
+      "Error": {
+        "type": "object",
+        "description": "ошибка: {\"поле\": [\"сообщение\"]}, {\"detail\": \"...\"} или [\"сообщение\"]",
+        "additionalProperties": true
+      },
+      "ReservationEvent": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "идентификатор",
+            "readOnly": true
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "created",
+              "edited",
+              "issued",
+              "returned",
+              "deleted"
+            ],
+            "description": "код действия",
+            "readOnly": true
+          },
+          "action_name": {
+            "type": "string",
+            "description": "название действия",
+            "readOnly": true
+          },
+          "actor_name": {
+            "type": "string",
+            "description": "инициатор события",
+            "readOnly": true
+          },
+          "details": {
+            "type": "string",
+            "description": "пояснение",
+            "readOnly": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "время события",
+            "readOnly": true
+          }
+        }
+      },
+      "ReservationEventInput": {
+        "type": "object",
+        "properties": {}
+      },
+      "Ticket": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "идентификатор",
+            "readOnly": true
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 150,
+            "description": "название, не короче 5 символов"
+          },
+          "description": {
+            "type": "string",
+            "description": "описание"
+          },
+          "category": {
+            "type": "integer",
+            "description": "id категории"
+          },
+          "category_name": {
+            "type": "string",
+            "description": "название категории",
+            "readOnly": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "new",
+              "progress",
+              "done"
+            ],
+            "description": "статус; при создании только new, далее new -> progress -> done"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "дата создания",
+            "readOnly": true
+          }
+        }
+      },
+      "TicketInput": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 150,
+            "description": "название, не короче 5 символов"
+          },
+          "description": {
+            "type": "string",
+            "description": "описание"
+          },
+          "category": {
+            "type": "integer",
+            "description": "id категории"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "new",
+              "progress",
+              "done"
+            ],
+            "description": "статус; при создании только new, далее new -> progress -> done"
+          }
+        },
+        "required": [
+          "title",
+          "category"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "sessionCookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "sessionid",
+        "description": "сессия Django; вход через /accounts/login/"
+      },
+      "csrfToken": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-CSRFToken",
+        "description": "значение cookie csrftoken; нужно для POST, PUT, PATCH, DELETE"
+      }
+    }
+  }
+}

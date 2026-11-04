@@ -1,0 +1,59 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Вход — Учебная часть</title>
+    <link rel="stylesheet" href="{% static 'core/dist/css/tabler.min.css' %}">
+    <link rel="stylesheet" href="{% static 'vendor/tabler-icons/tabler-icons.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/theme.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+<script src="{% static 'core/dist/js/tabler-theme.min.js' %}"></script>
+
+<div class="page page-center">
+    <div class="container container-tight py-4">
+
+        <div class="swatch swatch-sky login-swatch mb-3">
+            <div class="swatch-corners">
+                <span class="swatch-label">учебная часть</span>
+                <span class="swatch-label">учебные данные</span>
+            </div>
+            <div class="text-center my-auto">
+                <div class="swatch-label mb-2">факультеты, группы и курсы</div>
+                <div class="swatch-big">вход</div>
+            </div>
+        </div>
+
+        <div class="card card-md">
+            <div class="card-body">
+                {% if form.errors %}
+                    <div class="alert alert-danger">Неверное имя пользователя или пароль.</div>
+                {% endif %}
+
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ next }}">
+
+                    <div class="mb-3">
+                        <label class="form-label" for="id_username">Имя пользователя</label>
+                        <input type="text" name="username" id="id_username" class="form-control" required autofocus>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="id_password">Пароль</label>
+                        <input type="password" name="password" id="id_password" class="form-control" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">Войти</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'core/dist/js/tabler.min.js' %}"></script>
+</body>
+</html>

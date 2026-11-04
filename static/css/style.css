@@ -1,0 +1,12 @@
+.header-icon {
+    color: var(--app-sky);
+}
+
+.footer {
+    font-size: .75rem;
+    text-transform: lowercase;
+}
+
+.empty-icon .ti {
+    font-size: 3rem;
+}

@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Управление заявками{% endblock %}
+{% block pretitle %}<span class="crumbs"><a href="/profile/">учебные данные</a> › заявки</span>{% endblock %}
+{% block page_title %}Управление заявками{% endblock %}
+
+{% block page_actions %}
+<a href="{% url 'equipment_dashboard' %}" class="btn btn-outline-primary">
+    <i class="ti ti-device-laptop icon"></i> Бронирование оборудования
+</a>
+{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+<div id="message" role="status" aria-live="polite"></div>
+
+<div class="row row-cards">
+    <div class="col-12 col-lg-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <div>
+                    <h3 class="card-title">Новая заявка</h3>
+                    <div class="text-secondary small">Заполните данные и создайте заявку</div>
+                </div>
+            </div>
+            <div class="card-body">
+                <form id="ticket-form">
+                    <div class="mb-3">
+                        <label class="form-label" for="title">Название заявки</label>
+                        <input id="title" class="form-control" maxlength="150" placeholder="Например, настройка компьютера" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label" for="category">Категория</label>
+                        <select id="category" class="form-select" required></select>
+                    </div>
+                    <button class="btn btn-primary w-100" type="submit">
+                        <i class="ti ti-plus icon"></i> Создать заявку
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-lg-8">
+        <div class="card h-100">
+            <div class="card-header">
+                <div>
+                    <h3 class="card-title">Мои заявки</h3>
+                    <div class="text-secondary small">Статусы и действия обновляются без перезагрузки</div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row g-3 align-items-end mb-3">
+                    <div class="col-12 col-sm-6">
+                        <label class="form-label" for="status-filter">Статус</label>
+                        <select id="status-filter" class="form-select">
+                            <option value="">Все статусы</option>
+                            <option value="new">Новые</option>
+                            <option value="progress">В работе</option>
+                            <option value="done">Выполненные</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="loading" class="text-secondary py-2" hidden>Загрузка данных...</div>
+                <div id="tickets-list" aria-live="polite"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal modal-blur fade" id="status-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Изменение статуса заявки</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">
+                <label class="form-label" for="new-status">Новый статус</label>
+                <select id="new-status" class="form-select">
+                    <option value="new">Новая</option>
+                    <option value="progress">В работе</option>
+                    <option value="done">Выполнена</option>
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" id="save-status" class="btn btn-primary">Сохранить</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'tickets/app.js' %}"></script>
+{% endblock %}

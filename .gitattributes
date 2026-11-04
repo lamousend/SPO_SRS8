@@ -1,0 +1,6 @@
+# Переводы строк. Без этого Git в Windows (core.autocrlf=true) заменяет LF на CRLF:
+#  - в сторонних JS/CSS Tabler ломается проверка ссылок *.map в collectstatic;
+#  - скрипты bash с CRLF не запускаются (ошибка "set: pipefail\r").
+* text=auto
+*.sh text eol=lf
+static/** -text

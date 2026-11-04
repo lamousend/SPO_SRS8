@@ -1,0 +1,8 @@
+<div class="filter-bar">
+    <span class="text-secondary">Показать</span>
+    <a href="?" class="filter-chip {% if not current %}active{% endif %}">Все факультеты</a>
+    {% for item in items %}
+        <a href="?department={{ item.id }}" class="filter-chip {% if current == item.id %}active{% endif %}">{{ item }}</a>
+    {% endfor %}
+    <span class="filter-right text-secondary">Всего: {{ total }}</span>
+</div>

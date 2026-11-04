@@ -1,0 +1,171 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru" data-bs-theme="light" data-bs-navbar-position="vertical">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Учебная часть{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'core/dist/css/tabler.min.css' %}">
+    <link rel="stylesheet" href="{% static 'core/dist/css/tabler-vendors.min.css' %}">
+    <link rel="stylesheet" href="{% static 'vendor/tabler-icons/tabler-icons.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/theme.css' %}?v=5">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=5">
+</head>
+<body>
+<script src="{% static 'core/dist/js/tabler-theme.min.js' %}"></script>
+
+<div class="page">
+
+    <aside class="navbar navbar-vertical navbar-expand-lg">
+        <div class="container-fluid">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebar-menu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <a href="/profile/" class="navbar-brand text-reset">учебная часть</a>
+
+            {% if user.is_authenticated %}
+            <div class="navbar-nav flex-row d-lg-none">
+                <div class="nav-item dropdown">
+                    <a href="#" class="nav-link p-0 px-2" data-bs-toggle="dropdown">
+                        <span class="avatar avatar-sm">{{ user.username|slice:":2"|upper }}</span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-end">
+                        <a class="dropdown-item" href="/profile/">Профиль</a>
+                        <form method="post" action="/accounts/logout/">
+                            {% csrf_token %}
+                            <button class="dropdown-item text-danger" type="submit">Выйти</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="collapse navbar-collapse" id="sidebar-menu">
+                <ul class="navbar-nav pt-lg-3">
+                    <li class="nav-item {% if request.path == '/profile/' %}active{% endif %}">
+                        <a class="nav-link" href="/profile/">
+                            <span class="nav-link-icon"><i class="ti ti-user-circle"></i></span>
+                            <span class="nav-link-title">Профиль</span>
+                        </a>
+                    </li>
+                    <li class="nav-item {% if request.path|slice:':13' == '/departments/' %}active{% endif %}">
+                        <a class="nav-link" href="/departments/">
+                            <span class="nav-link-icon"><i class="ti ti-building"></i></span>
+                            <span class="nav-link-title">Факультеты</span>
+                        </a>
+                    </li>
+                    <li class="nav-item {% if request.path|slice:':8' == '/groups/' %}active{% endif %}">
+                        <a class="nav-link" href="/groups/">
+                            <span class="nav-link-icon"><i class="ti ti-users-group"></i></span>
+                            <span class="nav-link-title">Группы</span>
+                        </a>
+                    </li>
+                    <li class="nav-item {% if request.path|slice:':9' == '/courses/' %}active{% endif %}">
+                        <a class="nav-link" href="/courses/">
+                            <span class="nav-link-icon"><i class="ti ti-book"></i></span>
+                            <span class="nav-link-title">Курсы</span>
+                        </a>
+                    </li>
+                    <li class="nav-item {% if request.path == '/' %}active{% endif %}">
+                        <a class="nav-link" href="{% url 'dashboard' %}">
+                            <span class="nav-link-icon"><i class="ti ti-clipboard-list"></i></span>
+                            <span class="nav-link-title">Заявки</span>
+                        </a>
+                    </li>
+                    <li class="nav-item {% if request.path == '/reservations/' %}active{% endif %}">
+                        <a class="nav-link" href="{% url 'equipment_dashboard' %}">
+                            <span class="nav-link-icon"><i class="ti ti-device-laptop"></i></span>
+                            <span class="nav-link-title">Бронирования</span>
+                        </a>
+                    </li>
+                    {% if nav_dashboards %}
+                    <li class="nav-item dropdown {% if '/dashboards/' in request.path %}active{% endif %}">
+                        <a class="nav-link dropdown-toggle {% if '/dashboards/' in request.path %}show{% endif %}" href="#navbar-dashboards"
+                           data-bs-toggle="dropdown" data-bs-auto-close="false" role="button"
+                           aria-expanded="{% if '/dashboards/' in request.path %}true{% else %}false{% endif %}">
+                            <span class="nav-link-icon"><i class="ti ti-chart-pie"></i></span>
+                            <span class="nav-link-title">Дашборды</span>
+                        </a>
+                        <div class="dropdown-menu {% if '/dashboards/' in request.path %}show{% endif %}">
+                            <a class="dropdown-item {% if request.path == '/dashboards/' %}active{% endif %}" href="/dashboards/">
+                                <i class="ti ti-layout-dashboard me-2"></i>Все дашборды
+                            </a>
+                            {% for item in nav_dashboards %}
+                                <a class="dropdown-item {% if item.slug in request.path %}active{% endif %}" href="/dashboards/{{ item.slug }}/">
+                                    <i class="ti ti-{{ item.icon }} me-2"></i>{{ item.title }}
+                                </a>
+                            {% endfor %}
+                        </div>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </aside>
+
+    <header class="navbar navbar-expand-md d-none d-lg-flex">
+        <div class="container-xl">
+            <div class="navbar-nav flex-row ms-auto align-items-center">
+                <a href="?theme=dark" class="nav-link hide-theme-dark" title="Тёмная тема">
+                    <i class="ti ti-moon fs-2 header-icon"></i>
+                </a>
+                <a href="?theme=light" class="nav-link hide-theme-light" title="Светлая тема">
+                    <i class="ti ti-sun fs-2 header-icon"></i>
+                </a>
+
+                {% if user.is_authenticated %}
+                <div class="nav-item dropdown ms-3">
+                    <a href="#" class="nav-link d-flex align-items-center gap-2 p-0" data-bs-toggle="dropdown">
+                        <span class="avatar avatar-sm">{{ user.username|slice:":2"|upper }}</span>
+                        <span>{{ user.username }}</span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-end">
+                        <a class="dropdown-item" href="/profile/">Профиль</a>
+                        <form method="post" action="/accounts/logout/">
+                            {% csrf_token %}
+                            <button class="dropdown-item text-danger" type="submit">Выйти</button>
+                        </form>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <div class="page-wrapper">
+        <div class="page-header">
+            <div class="container-xl">
+                <div class="row g-2 align-items-center">
+                    <div class="col">
+                        <div class="page-pretitle">{% block pretitle %}учебные данные{% endblock %}</div>
+                        <h2 class="page-title">{% block page_title %}{% endblock %}</h2>
+                    </div>
+                    <div class="col-auto">
+                        {% block page_actions %}{% endblock %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="page-body">
+            <div class="container-xl">
+                {% for message in messages %}
+                    <div class="alert alert-success alert-dismissible">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+        <footer class="footer footer-transparent">
+            <div class="container-xl text-secondary">учебный сайт</div>
+        </footer>
+    </div>
+</div>
+
+<script src="{% static 'core/dist/js/tabler.min.js' %}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

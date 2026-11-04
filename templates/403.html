@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block title %}Доступ запрещён{% endblock %}
+{% block pretitle %}ошибка 403{% endblock %}
+{% block page_title %}Доступ запрещён{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="empty">
+        <div class="empty-icon"><i class="ti ti-lock"></i></div>
+        <p class="empty-title">Раздел доступен только методисту</p>
+        <p class="empty-subtitle text-secondary">У вашей учётной записи нет прав на просмотр этой страницы.</p>
+        <div class="empty-action">
+            <a href="/dashboards/" class="btn btn-primary"><i class="ti ti-arrow-left icon"></i>К дашбордам</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

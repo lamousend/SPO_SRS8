@@ -1,0 +1,21 @@
+{% extends 'dashboards/base_dashboard.html' %}
+{% load dashboard_ui %}
+
+{% block widgets %}
+<div class="row row-cards">
+    <div class="col-12 col-md-4">{% kpi_card 'Всего студентов' 'users' data.kpis.total %}</div>
+    <div class="col-12 col-md-4">{% kpi_card 'Средний размер группы' 'users-group' data.kpis.avg_group %}</div>
+    <div class="col-12 col-md-4">{% kpi_card 'Записаны на курсы' 'book' data.kpis.with_courses %}</div>
+
+    <div class="col-12">
+        {% chart_card 'registrations' 'Регистрация студентов' 'column' 'новые студенты по дате регистрации' %}
+    </div>
+    <div class="col-12 col-md-5 col-xl-4">
+        {% chart_card 'by_department' 'Студенты по факультетам' 'donut' 'все факультеты' height=340 %}
+    </div>
+    <div class="col-12 col-md-7 col-xl-8">
+        {% chart_card 'group_fill' 'Наполняемость групп' 'hbar' 'число студентов в группе' height=340 %}
+    </div>
+    <div class="col-12">{% table_card dashboard data.rows %}</div>
+</div>
+{% endblock %}

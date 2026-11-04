@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ dashboard.title }}{% endblock %}
+{% block pretitle %}<span class="crumbs"><a href="{% url 'dashboard_index' %}">дашборды</a> › {{ dashboard.title|lower }}</span>{% endblock %}
+{% block page_title %}{{ dashboard.title }}{% endblock %}
+
+{% block content %}
+<form class="card mb-3">
+    <div class="card-body">
+        <div class="row g-3">
+            {% for item in dashboard.filter_fields %}
+                <div class="col-12 col-sm-6 col-lg-3">
+                    <label class="form-label">{{ item.filter.label }}</label>
+                    <select class="form-select" name="{{ item.filter.name }}" onchange="this.form.submit()">
+                        {% if item.filter.all_label %}<option value="">{{ item.filter.all_label }}</option>{% endif %}
+                        {% for option in item.options %}
+                            <option value="{{ option.value }}" {% if option.value == item.current %}selected{% endif %}>{{ option.label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</form>
+{% block widgets %}{% endblock %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'core/dist/libs/apexcharts/dist/apexcharts.min.js' %}"></script>
+<script src="{% static 'core/dist/libs/list.js/dist/list.min.js' %}"></script>
+{{ data.charts|json_script:"charts" }}
+<script src="{% static 'js/dashboard.js' %}"></script>
+{% endblock %}

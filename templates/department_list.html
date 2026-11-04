@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Факультеты{% endblock %}
+{% block pretitle %}<span class="crumbs"><a href="/profile/">учебные данные</a> › факультеты</span>{% endblock %}
+{% block page_title %}Факультеты{% endblock %}
+
+{% block page_actions %}
+    {% if is_methodist %}
+        <a class="btn btn-primary" href="/departments/add/">
+            <i class="ti ti-plus icon"></i><span class="d-none d-sm-inline">Добавить факультет</span>
+        </a>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="filter-bar">
+    <span class="text-secondary">Всего: {{ departments|length }}</span>
+</div>
+
+{% for department in departments %}
+    <div class="list-row">
+        <div class="list-row-icon"><i class="ti ti-building"></i></div>
+        <div class="list-row-main">
+            <div class="fw-bold">{{ department.name }}</div>
+            <div class="list-row-sub">Учебных групп: {{ department.groups_n }}, курсов: {{ department.courses_n }}</div>
+        </div>
+        {% if is_methodist %}
+            <div class="d-flex gap-2">
+                <a class="btn-square" href="/departments/{{ department.id }}/edit/" title="Изменить"><i class="ti ti-pencil"></i></a>
+                <a class="btn-square text-danger" href="/departments/{{ department.id }}/delete/" title="Удалить"><i class="ti ti-trash"></i></a>
+            </div>
+        {% endif %}
+    </div>
+{% empty %}
+    <div class="card">
+        <div class="empty">
+            <div class="empty-icon"><i class="ti ti-building"></i></div>
+            <p class="empty-title">Факультетов пока нет</p>
+        </div>
+    </div>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,11 @@
+<div class="card h-100">
+    <div class="card-header">
+        <div>
+            <h3 class="card-title">{{ title }}</h3>
+            {% if subtitle %}<p class="card-subtitle">{{ subtitle }}</p>{% endif %}
+        </div>
+    </div>
+    <div class="card-body">
+        <div data-chart="{{ key }}" data-type="{{ type }}" data-height="{{ height }}"></div>
+    </div>
+</div>
