@@ -60,5 +60,3 @@ VERIFY_DATABASE_URL=postgresql://USER:PASSWORD@localhost:5432/verify bash script
 | python вызывал заглушку Microsoft Store | в инструкцию добавлен py -3.12 |
 | при ручной правке .env ключом заменили всю строку | добавлен make_env.py и пример строки |
 | в .env не хватало переменных | make_env.py проверяет обязательные переменные |
-| collectstatic не находил файлы .map из-за переводов строк CRLF | исправлен config/storage.py, добавлен .gitattributes |
-| резервная копия сохранялась в кодировке cp1251 | backup_restore.py сохраняет копию в UTF-8 |
