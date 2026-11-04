@@ -1,105 +1,96 @@
 # База данных
 
-Локально используется SQLite (`db.sqlite3`), в облаке — PostgreSQL. Схема создаётся
-миграциями приложений (`python manage.py migrate`) и в обеих СУБД одинакова.
+Локально используется SQLite (db.sqlite3), на Render - PostgreSQL. Таблицы создаются миграциями
+(python manage.py migrate) и в обеих базах одинаковые.
 
-## Схема моделей: заявки и бронирование оборудования
+## Схема моделей
 
-![ER-диаграмма: заявки и бронирование](img/er.png)
+![Схема моделей](img/er.png)
 
-*Рисунок 1 — связи сущностей (PK — первичный ключ, FK — внешний, UK — уникальное поле).*
+Рисунок 1 - модели заявок и бронирования оборудования (FK - ссылка на другую таблицу).
 
-## Модели и ключевые поля
+## Модели и поля
 
-### Category (`accounts_category`)
+### Category - категория заявки
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `id` | PK | идентификатор |
-| `name` | CharField(150), unique | название категории |
+| id | число | идентификатор |
+| name | строка, уникальная | название |
 
-### Ticket (`accounts_ticket`) — заявка
+### Ticket - заявка
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `id` | PK | |
-| `title` | CharField(150) | название, не короче 5 символов (проверка сериализатора) |
-| `description` | TextField, blank | описание |
-| `category` | FK → Category, **PROTECT** | категорию с заявками удалить нельзя |
-| `owner` | FK → User, CASCADE | владелец; назначается сервером |
-| `status` | CharField(10) | `new` / `progress` / `done` |
-| `created_at` | DateTime, auto | дата создания |
+| id | число | идентификатор |
+| title | строка | название, не короче 5 символов |
+| description | текст | описание |
+| category | ссылка на Category | категорию с заявками удалить нельзя |
+| owner | ссылка на User | владелец, задается сервером |
+| status | строка | new, progress или done |
+| created_at | дата и время | дата создания |
 
-### Equipment (`accounts_equipment`) — оборудование
+### Equipment - оборудование
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `id` | PK | |
-| `name` | CharField(150), unique | название |
-| `total_q` | PositiveInteger | общее количество |
-| `available_q` | PositiveInteger | доступный остаток; меняется только выдачей и возвратом |
+| id | число | идентификатор |
+| name | строка, уникальная | название |
+| total_q | число | общее количество |
+| available_q | число | доступный остаток, меняется только при выдаче и возврате |
 
-### EquipmentReservation (`accounts_equipmentreservation`) — бронирование
+### EquipmentReservation - бронирование
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `id` | PK | |
-| `purpose` | CharField(150) | назначение, не короче 5 символов |
-| `equipment` | FK → Equipment, **PROTECT** | |
-| `quantity` | PositiveInteger | количество, больше нуля |
-| `owner` | FK → User, CASCADE | назначается сервером |
-| `status` | CharField(10) | `created` / `issued` / `returned` |
-| `created_at` | DateTime, auto | |
-| `deleted_at` | DateTime, null | отметка «мягкого» удаления |
+| id | число | идентификатор |
+| purpose | строка | назначение, не короче 5 символов |
+| equipment | ссылка на Equipment | оборудование с бронированиями удалить нельзя |
+| quantity | число | количество, больше нуля |
+| owner | ссылка на User | владелец, задается сервером |
+| status | строка | created, issued или returned |
+| created_at | дата и время | дата создания |
+| deleted_at | дата и время | отметка удаления; запись скрывается, но остается в базе |
 
-### ReservationEvent (`accounts_reservationevent`) — история
+### ReservationEvent - история бронирования
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `id` | PK | |
-| `reservation` | FK → EquipmentReservation, **PROTECT** | |
-| `actor` | FK → User, **SET_NULL**, null | инициатор; остаётся запись, если пользователь удалён |
-| `action` | CharField(10) | `created`, `edited`, `issued`, `returned`, `deleted` |
-| `details` | CharField(200) | пояснение |
-| `created_at` | DateTime, auto | время события |
+| id | число | идентификатор |
+| reservation | ссылка на EquipmentReservation | бронирование |
+| actor | ссылка на User | кто выполнил действие |
+| action | строка | created, edited, issued, returned, deleted |
+| details | строка | пояснение |
+| created_at | дата и время | время события |
 
-## Схема моделей: учебные данные и журнал активности
+## Учебные справочники
 
-![ER-диаграмма: учебные данные](img/er2.png)
+В проекте также есть модели из прошлых работ: Department (факультет), Course (курс), AcademicGroup
+(группа), StudentProfile (профиль студента) и ActivityEvent (журнал активности).
 
-*Рисунок 2 — модели `Department`, `Course`, `AcademicGroup`, `StudentProfile` (приложение `accounts`) и `ActivityEvent` (приложение `dashboards`).*
+## Что происходит при удалении
 
-| Модель | Назначение |
-|--------|------------|
-| `Department` | факультет |
-| `Course` | курс, принадлежит факультету |
-| `AcademicGroup` | учебная группа, принадлежит факультету |
-| `StudentProfile` | профиль пользователя: факультет, группа, курсы (M2M) |
-| `ActivityEvent` | журнал входов и изменений справочников; пишется сигналами |
+| Связь | Правило | Что значит |
+|-------|---------|------------|
+| заявка - категория, бронирование - оборудование, событие - бронирование | PROTECT | нельзя удалить запись, на которую есть ссылки |
+| заявка и бронирование - владелец | CASCADE | при удалении пользователя удаляются его заявки и бронирования |
+| событие - инициатор, ActivityEvent - пользователь | SET_NULL | история остается без ссылки на пользователя |
 
-## Поведение при удалении (`on_delete`)
+## Остатки оборудования
 
-| Связь | Правило | Смысл |
-|-------|---------|-------|
-| Ticket → Category, Reservation → Equipment, Event → Reservation | PROTECT | нельзя удалить объект, на который ссылаются |
-| Ticket/Reservation → User (owner) | CASCADE | удаление пользователя удаляет его заявки и бронирования |
-| Event → User (actor), ActivityEvent → User | SET_NULL | история сохраняется без привязки к пользователю |
-
-## Целостность остатков
-
-`available_q` изменяется только в `reservation_services.py` атомарным `UPDATE ... SET available_q = available_q ± quantity`
-с условием в `WHERE` (`available_q >= quantity` при выдаче, `available_q <= total_q - quantity` при возврате).
-Выдача и возврат выполняются в одной транзакции со сменой статуса и записью события; при сбое откатываются все изменения.
+Остаток меняется только в reservation_services.py одним запросом UPDATE с проверкой условия:
+при выдаче остаток должен быть не меньше количества, при возврате не больше общего количества.
+Выдача и возврат выполняются в одной транзакции со сменой статуса и записью события.
+Если что-то пошло не так, отменяются все изменения.
 
 ## Миграции
 
-| Миграция | Что создаёт |
+| Миграция | Что создает |
 |----------|-------------|
-| `accounts/0001` | `Department`, `Course`, `StudentProfile` |
-| `accounts/0002`, `0003` | поле `Course.description`; `AcademicGroup` и `StudentProfile.academic_group` |
-| `accounts/0004`–`0006` | `Category`, `Ticket`; затем поля `category`, `owner`, правка статуса и правил `on_delete` |
-| `accounts/0007` | `Equipment`, `EquipmentReservation`, `ReservationEvent` |
-| `dashboards/0001` | `ActivityEvent` |
+| accounts 0001-0003 | факультеты, курсы, группы, профили |
+| accounts 0004-0006 | категории и заявки |
+| accounts 0007 | оборудование, бронирования, история |
+| dashboards 0001 | журнал активности |
 
-Просмотр состояния: `python manage.py showmigrations`. Проверка, что модели и миграции согласованы:
-`python manage.py makemigrations --check --dry-run`.
+Проверить состояние: python manage.py showmigrations. Проверить, что модели и миграции совпадают:
+python manage.py makemigrations --check --dry-run.
 
-## SQLite и PostgreSQL — разные базы
+## SQLite и PostgreSQL - разные базы
 
-Локальный `db.sqlite3` и облачная PostgreSQL никак не связаны. Данные, созданные локально, в облаке не появятся, и наоборот.
-Перенос выполняется только вручную — см. [backup-restore.md](backup-restore.md).
+Данные из локальной базы не попадают на Render, и наоборот. Перенести их можно вручную -
+см. [backup-restore.md](backup-restore.md).

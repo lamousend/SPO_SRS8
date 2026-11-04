@@ -1,113 +1,105 @@
-# Облачное развёртывание (Render + PostgreSQL)
+# Публикация на Render
 
-Инструкция соответствует ПЗ № 8. Используются бесплатные ресурсы Render. Фактические
-секреты, пароли и адреса баз в документацию и репозиторий **не вносятся**.
+Инструкция повторяет ПЗ № 8 и использует бесплатные ресурсы Render. Настоящие ключи, пароли
+и адреса баз в документацию и репозиторий не вносятся.
 
 ## 1. Схема
 
-Браузер → HTTPS → Render Web Service → Gunicorn → Django/DRF → PostgreSQL;
-статику выдаёт WhiteNoise (см. [architecture.md](architecture.md)).
+Браузер - HTTPS - Render Web Service - Gunicorn - Django и DRF - PostgreSQL. Статику отдает WhiteNoise
+(см. [architecture.md](architecture.md)).
 
 ## 2. Переменные окружения
 
 | Переменная | Назначение | Значение на Render |
 |------------|------------|--------------------|
-| `DJANGO_SECRET_KEY` | секретный ключ: подпись сессий и токенов. Без неё проект не стартует | сгенерировать (кнопка Generate на Render) |
-| `DJANGO_DEBUG` | `true` показывает подробные ошибки и накапливает запросы в памяти. В эксплуатации запрещено | `false` |
-| `DJANGO_ALLOWED_HOSTS` | домены, на которые отвечает Django; чужой `Host` → `400 DisallowedHost` | `your-app.onrender.com` (без `https://`) |
-| `DJANGO_CSRF_TRUSTED_ORIGINS` | HTTPS-источники для проверки CSRF при `POST`/`PATCH`/`DELETE` | `https://your-app.onrender.com` (со схемой) |
-| `DATABASE_URL` | подключение к PostgreSQL; обработка — `dj-database-url` | **Internal Database URL** из карточки БД |
+| DJANGO_SECRET_KEY | секретный ключ; без него проект не запускается | создать кнопкой Generate |
+| DJANGO_DEBUG | режим отладки, в работе запрещен | false |
+| DJANGO_ALLOWED_HOSTS | адреса, на которые отвечает сайт; чужой адрес - ошибка 400 | your-app.onrender.com (без https://) |
+| DJANGO_CSRF_TRUSTED_ORIGINS | адреса, с которых можно отправлять формы и POST-запросы | https://your-app.onrender.com |
+| DATABASE_URL | подключение к PostgreSQL | Internal Database URL из карточки базы |
 
 Правила:
 
-- `DATABASE_URL` содержит пароль. Его значение нельзя публиковать, коммитить и вставлять в отчёт —
-  на скриншотах значения переменных скрываются.
-- **Internal Database URL** действует только внутри сети Render (веб-сервис ↔ БД в одном регионе) —
-  его указывают у веб-сервиса. **External Database URL** нужен для подключения с вашего компьютера
-  (разовые миграции); его не сохраняют в файлах и закрывают окно терминала после работы.
-- Образец имён и безопасных значений — `.env.example`.
+- В DATABASE_URL есть пароль. Его нельзя публиковать, хранить в Git и показывать на скриншотах.
+- Internal Database URL работает только внутри Render. Его указывают у веб-сервиса.
+- External Database URL нужен только для разовых миграций со своего компьютера. В файлы его не записывают.
+- Образец имен переменных - в файле .env.example.
 
-## 3. Создание PostgreSQL
+## 3. База PostgreSQL
 
-1. Render → **New → PostgreSQL**.
-2. Имя, например `pz8-django-db`; регион — тот же, что у веб-сервиса (в ПЗ 8 — Oregon); тариф **Free**.
-3. После создания в карточке БД скопируйте *Internal Database URL* (для веб-сервиса).
+1. Render - New - PostgreSQL.
+2. Имя, например pz8-django-db; регион как у веб-сервиса (Oregon); тариф Free.
+3. Скопируйте Internal Database URL из карточки базы.
 
-## 4. Создание Web Service
+## 4. Web Service
 
-1. Render → **New → Web Service** → подключить репозиторий GitHub.
-2. Параметры:
+1. Render - New - Web Service, подключите репозиторий GitHub.
+2. Заполните поля:
 
 | Поле | Значение |
 |------|----------|
 | Language | Python 3 |
-| Region | как у БД |
+| Region | как у базы |
 | Instance Type | Free |
-| Build Command | `bash build.sh` |
-| Start Command | `gunicorn config.wsgi:application --bind 0.0.0.0:$PORT` |
-| Health Check Path (необязательно) | `/healthz/` |
+| Build Command | bash build.sh |
+| Start Command | gunicorn config.wsgi:application --bind 0.0.0.0:$PORT |
+| Health Check Path | /healthz/ |
 
-3. В разделе Environment добавьте пять переменных из таблицы выше.
+3. В разделе Environment добавьте пять переменных из раздела 2.
 
-## 5. Разделение процессов
+## 5. Этапы
 
-| Этап | Когда | Команда | Что делает |
-|------|-------|---------|------------|
-| Сборка | при каждом деплое | `bash build.sh` = `pip install -r requirements.txt` + `python manage.py collectstatic --noinput` | ставит зависимости, собирает статику в `staticfiles/` |
-| Миграции | после появления БД и при изменении моделей | `python manage.py migrate` | создаёт/обновляет таблицы |
-| Запуск | при старте сервиса | `gunicorn config.wsgi:application --bind 0.0.0.0:$PORT` | запускает Django |
-| Проверка | после деплоя | `GET /healthz/`, страница входа, API | см. раздел 7 |
+| Этап | Когда | Команда |
+|------|-------|---------|
+| Сборка | при каждой публикации | bash build.sh (установка зависимостей и collectstatic) |
+| Миграции | после создания базы и при изменении моделей | python manage.py migrate |
+| Запуск | при старте сервиса | gunicorn config.wsgi:application --bind 0.0.0.0:$PORT |
+| Проверка | после публикации | /healthz/, страница входа, запросы к API |
 
-Миграции в ПЗ 8 выполнены один раз **с локального компьютера** (на бесплатном тарифе консоль сервиса недоступна).
-В отдельном окне терминала, не записывая значение в файлы:
+На бесплатном тарифе консоли нет, поэтому миграции выполняются один раз со своего компьютера.
+Адрес базы задается только в текущем окне терминала:
 
 ```powershell
 # Windows PowerShell
 $env:DATABASE_URL = "<External Database URL из Render>"
-$env:DJANGO_SECRET_KEY = "temporary-local-value"
 python manage.py migrate
-python manage.py showmigrations
 python manage.py createsuperuser
 ```
 ```bash
-# Linux / macOS
-DATABASE_URL='<External Database URL из Render>' DJANGO_SECRET_KEY=temporary python manage.py migrate
+# Linux, macOS
+DATABASE_URL='<External Database URL из Render>' python manage.py migrate
 ```
 
-Затем закройте терминал. Если у плана есть Pre-Deploy Command, `python manage.py migrate` можно задать там.
-Тестовые данные в облаке: категории и оборудование добавляются через `/admin/` суперпользователя
-(или командой `seed_lab_data` тем же способом).
+После этого закройте окно терминала. Категории и оборудование добавьте в /admin/.
 
-## 6. Локальная SQLite и облачная PostgreSQL
+## 6. Локальная и облачная база
 
-Это **разные базы**. Данные, созданные локально, в облаке не появятся, и данные облака не попадают в `db.sqlite3`.
-Диск веб-сервиса на Render временный: SQLite-файл там пропал бы при перезапуске, поэтому в облаке
-используется только PostgreSQL. Перенос данных — [backup-restore.md](backup-restore.md).
+Это разные базы. Данные из SQLite не попадают на Render, и наоборот. Диск веб-сервиса на Render
+временный, поэтому SQLite там потеряла бы данные при перезапуске. Перенос данных - в
+[backup-restore.md](backup-restore.md).
 
-## 7. Проверка работы
+## 7. Проверка
 
-| № | Проверка | Ожидание |
-|---|----------|----------|
-| 1 | статус сервиса | `Live`; в логе `Listening at: http://0.0.0.0:...` и `Booting worker` |
-| 2 | `GET https://your-app.onrender.com/healthz/` | `200`, `{"status": "ok"}` |
-| 3 | страница входа | открывается по HTTPS с оформлением Tabler (статика без `404`) |
-| 4 | вход и `GET /api/categories/` | `200`, данные из PostgreSQL |
-| 5 | `POST /api/tickets/` или `/api/reservations/` из интерфейса | `201` |
-| 6 | **Manual Deploy → Restart**, затем обновить страницу | созданная запись сохранилась |
-| 7 | несуществующий адрес при `DJANGO_DEBUG=false` | краткая страница Not Found без отладочной информации |
+| № | Что проверить | Результат |
+|---|---------------|-----------|
+| 1 | статус сервиса | Live, в логе Booting worker |
+| 2 | https://your-app.onrender.com/healthz/ | 200, {"status": "ok"} |
+| 3 | страница входа | открывается по HTTPS с оформлением |
+| 4 | вход и GET /api/categories/ | 200, данные из PostgreSQL |
+| 5 | создание записи в интерфейсе | 201 |
+| 6 | Manual Deploy - Restart, затем обновить страницу | запись осталась |
+| 7 | несуществующий адрес | короткая страница Not Found без отладки |
 
-На бесплатном тарифе неактивный сервис может «засыпать»: первый запрос после паузы выполняется заметно дольше.
+Бесплатный сервис засыпает без запросов, поэтому первая загрузка после паузы долгая.
 
 ## 8. Проверка настроек безопасности
 
 ```bash
-DJANGO_DEBUG=false python manage.py check --deploy
+python manage.py check --deploy
 ```
 
-Предупреждения `security.W004`, `W008`, `W012`, `W016` относятся к HTTPS-настройкам, которые обеспечивает
-платформа (`SECURE_PROXY_SSL_HEADER` уже задан); `W009` появляется, если ключ короче 50 символов или имеет мало уникальных символов —
-при необходимости задайте более длинный ключ (`python -c "import secrets; print(secrets.token_urlsafe(64))"`).
+Предупреждения W004, W008, W012 и W016 касаются HTTPS, который дает Render. W009 появляется при коротком ключе.
 
-## 9. Ошибки при развёртывании
+## 9. Ошибки
 
 См. [troubleshooting.md](troubleshooting.md).

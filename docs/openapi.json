@@ -642,7 +642,7 @@
     "/api/reservations/{id}/issue/": {
       "post": {
         "operationId": "ReservationViewSet_issue",
-        "summary": "Выдать оборудование: created → issued, остаток уменьшается (транзакция)",
+        "summary": "Выдать оборудование: created - issued, остаток уменьшается (транзакция)",
         "tags": [
           "reservations"
         ],
@@ -710,7 +710,7 @@
     "/api/reservations/{id}/return_equipment/": {
       "post": {
         "operationId": "ReservationViewSet_return_equipment",
-        "summary": "Вернуть оборудование: issued → returned, остаток увеличивается (транзакция)",
+        "summary": "Вернуть оборудование: issued - returned, остаток увеличивается (транзакция)",
         "tags": [
           "reservations"
         ],
@@ -1359,7 +1359,7 @@
               "progress",
               "done"
             ],
-            "description": "статус; при создании только new, далее new -> progress -> done"
+            "description": "статус: при создании new, затем progress, затем done"
           },
           "created_at": {
             "type": "string",
@@ -1392,7 +1392,7 @@
               "progress",
               "done"
             ],
-            "description": "статус; при создании только new, далее new -> progress -> done"
+            "description": "статус: при создании new, затем progress, затем done"
           }
         },
         "required": [

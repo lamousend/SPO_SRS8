@@ -1,76 +1,65 @@
-# SPO_SRS8 — учебная система: заявки и бронирование оборудования
+# SPO_SRS8 - заявки и бронирование оборудования
 
-Django-проект с интерфейсом на Tabler и REST API на Django REST Framework.
-Объединяет результаты ПЗ № 7 (заявки), СРС № 7 (бронирование оборудования
-с историей и транзакциями) и ПЗ № 8 (подготовка к эксплуатации и публикация
-на Render). Репозиторий передаётся другому разработчику вместе с полным
-комплектом документации: после прочтения этого файла проект можно
-установить и запустить без устных пояснений автора.
+Учебный Django-проект: интерфейс на Tabler и REST API на Django REST Framework.
+Объединяет ПЗ № 7 (заявки), СРС № 7 (бронирование оборудования) и ПЗ № 8 (публикация на Render).
+По этому файлу проект можно установить и запустить без помощи автора.
 
 ## Назначение
 
-Система решает две учебные задачи для зарегистрированных пользователей:
+Система решает две задачи для зарегистрированных пользователей:
 
-1. Заявки — создание заявки в выбранной категории и последовательная
-   смена статуса `Новая → В работе → Выполнена`.
-2. Бронирование оборудования — создание бронирования ограниченного
-   ресурса, его выдача и возврат с контролем остатка и журналом событий.
-
-Предназначена для студентов и преподавателей как пример полного цикла
-«интерфейс → REST API → база данных → публикация».
+1. Заявки - создание заявки и смена статуса по цепочке: Новая - В работе - Выполнена.
+2. Бронирование оборудования - бронирование, выдача и возврат с учетом остатка и историей событий.
 
 ## Функциональность
 
-| Сценарий | Что умеет пользователь | Ограничения |
-|----------|------------------------|-------------|
-| Заявки (`/`) | Создать, изменить статус, удалить, фильтровать по статусу | Видит только свои заявки; статус меняется строго по цепочке, пропуск или откат — HTTP 400 |
-| Бронирования (`/reservations/`) | Создать, редактировать, удалить, выдать, вернуть, смотреть историю, фильтровать по статусу и оборудованию | Редактировать и удалять можно только состояние `created`; выдача требует достаточного остатка; удаление «мягкое», история сохраняется |
-| Справочники (`/departments/`, `/groups/`, `/courses/`) | Просмотр; изменение — роль «Методист» | Группа `Методист` задаётся в админ-панели |
-| Администрирование (`/admin/`) | Добавление категорий и оборудования, управление пользователями | Только суперпользователь / персонал |
-| Проверка работоспособности (`/healthz/`) | Возвращает `{"status": "ok"}` без обращения к БД | — |
+| Раздел | Что можно сделать | Ограничения |
+|--------|-------------------|-------------|
+| Заявки (/) | создать, сменить статус, удалить, отфильтровать | видны только свои заявки; статус нельзя пропустить или вернуть назад (ошибка 400) |
+| Бронирования (/reservations/) | создать, изменить, удалить, выдать, вернуть, посмотреть историю, отфильтровать | менять и удалять можно только созданное бронирование; для выдачи нужен остаток; при удалении история сохраняется |
+| Справочники (/departments/, /groups/, /courses/) | просмотр; изменение - для группы «Методист» | группа задается в админ-панели |
+| Админ-панель (/admin/) | категории, оборудование, пользователи | только для администратора |
+| Проверка сервера (/healthz/) | ответ {"status": "ok"} | - |
 
-Оборудование и категории заявок через REST API доступны только для чтения:
-добавляются через `/admin/` или командой `seed_lab_data`.
+Категории и оборудование через API только читаются. Добавить их можно в /admin/ или командой seed_lab_data.
 
 ## Технологии
 
-| Компонент | Версия / назначение |
+| Компонент | Версия и назначение |
 |-----------|---------------------|
 | Python | 3.12 или новее |
 | Django | 6.1.1 |
-| Django REST Framework | 3.18.3, сессионная аутентификация |
-| Tabler + JavaScript (`fetch`) | интерфейс, лежит в `static/core/`, подключается локально |
-| SQLite | локальная БД по умолчанию (`db.sqlite3`) |
-| PostgreSQL + psycopg 3 | облачная БД (Render) |
-| dj-database-url | выбор БД по переменной `DATABASE_URL` |
-| Gunicorn | WSGI-сервер в эксплуатации |
-| WhiteNoise | раздача статических файлов |
+| Django REST Framework | 3.18.3, вход по сессии |
+| Tabler и JavaScript (fetch) | интерфейс, файлы в static/core/ |
+| SQLite | база для локального запуска |
+| PostgreSQL и psycopg 3 | база на Render |
+| dj-database-url | выбор базы по DATABASE_URL |
+| Gunicorn | сервер на Render |
+| WhiteNoise | выдача статических файлов |
 
-Точные версии всех пакетов закреплены в [requirements.txt](requirements.txt).
+Точные версии пакетов - в [requirements.txt](requirements.txt).
 
 ## Структура документации
 
-| Файл | Содержание |
+| Файл | Что внутри |
 |------|------------|
-| [docs/project-structure.md](docs/project-structure.md) | каталоги и конфигурационные файлы |
-| [docs/architecture.md](docs/architecture.md) | архитектурная схема и границы взаимодействия |
-| [docs/database.md](docs/database.md) | модели БД, поля, связи, миграции |
-| [docs/api.md](docs/api.md) | карточки всех REST-маршрутов с примерами |
-| [docs/api-reference.md](docs/api-reference.md) | справочник маршрутов, параметров и полей, создаётся автоматически |
-| [docs/openapi.json](docs/openapi.json) | схема OpenAPI 3.0, создаётся автоматически (Swagger Editor, Postman) |
-| [docs/ci-and-releases.md](docs/ci-and-releases.md) | CI, локальный прогон CI, выпуск версий |
-| [docs/local-setup.md](docs/local-setup.md) | запуск с нуля на своём компьютере |
-| [docs/deployment.md](docs/deployment.md) | развёртывание на Render + PostgreSQL |
-| [docs/troubleshooting.md](docs/troubleshooting.md) | типичные ошибки и диагностика |
-| [docs/reproducibility.md](docs/reproducibility.md) | протокол проверки чистого запуска |
-| [docs/backup-restore.md](docs/backup-restore.md) | резервная копия и восстановление данных |
-| [CHANGELOG.md](CHANGELOG.md) | журнал изменений релизов |
+| [docs/project-structure.md](docs/project-structure.md) | каталоги и файлы настроек |
+| [docs/architecture.md](docs/architecture.md) | схема и путь запроса |
+| [docs/database.md](docs/database.md) | модели, поля, связи, миграции |
+| [docs/api.md](docs/api.md) | описание всех маршрутов API |
+| [docs/api-reference.md](docs/api-reference.md) | справочник API, создается автоматически |
+| [docs/openapi.json](docs/openapi.json) | схема OpenAPI 3.0, создается автоматически |
+| [docs/local-setup.md](docs/local-setup.md) | запуск на своем компьютере |
+| [docs/deployment.md](docs/deployment.md) | публикация на Render |
+| [docs/troubleshooting.md](docs/troubleshooting.md) | типичные ошибки |
+| [docs/reproducibility.md](docs/reproducibility.md) | проверка запуска с нуля |
+| [docs/backup-restore.md](docs/backup-restore.md) | резервная копия данных |
+| [docs/ci-and-releases.md](docs/ci-and-releases.md) | CI и выпуск версий |
+| [CHANGELOG.md](CHANGELOG.md) | журнал изменений |
 
 ## Подготовка
 
-Нужны Python 3.12+ и Git. Проверка: `python --version` (в Windows также
-может называться `py --version`). Если в Windows `python` выводит только слово `Python`, это заглушка
-Microsoft Store: создайте окружение командой `py -3.12 -m venv .venv` (подробнее — [docs/local-setup.md](docs/local-setup.md)).
+Нужны Python 3.12+ и Git.
 
 ```bash
 git clone https://github.com/lamousend/SPO_SRS8.git
@@ -78,12 +67,15 @@ cd SPO_SRS8
 python -m venv .venv
 ```
 
+Если в Windows команда python выводит только слово Python, используйте py -3.12 -m venv .venv
+(подробнее - в [docs/local-setup.md](docs/local-setup.md)).
+
 Активация окружения:
 
-| ОС | Команда |
-|----|---------|
-| Windows PowerShell | `.venv\Scripts\Activate.ps1` |
-| Linux / macOS | `source .venv/bin/activate` |
+| Система | Команда |
+|---------|---------|
+| Windows PowerShell | .venv\Scripts\Activate.ps1 |
+| Linux, macOS | source .venv/bin/activate |
 
 ```bash
 python -m pip install -r requirements.txt
@@ -91,27 +83,23 @@ python -m pip install -r requirements.txt
 
 ## Настройка
 
-Секреты и режимы работы берутся из переменных окружения. Для локальной
-работы создайте файл `.env` из образца с новым случайным ключом (файл читается
-автоматически и не попадает в Git):
+Настройки берутся из переменных окружения. Для локального запуска создайте файл .env с новым ключом:
 
 ```bash
 python scripts/make_env.py
 ```
 
-Вручную: `cp .env.example .env` (Windows: `copy`) и замена значения после `=` в строке
-`DJANGO_SECRET_KEY=` — см. [docs/local-setup.md](docs/local-setup.md).
+Файл .env читается автоматически и не попадает в Git.
 
-| Переменная | Назначение | Локальное значение-пример |
-|------------|------------|---------------------------|
-| `DJANGO_SECRET_KEY` | секретный ключ Django, обязательна | `replace-with-a-long-random-string` (замените своим) |
-| `DJANGO_DEBUG` | режим отладки; в облаке всегда `false` | `true` |
-| `DJANGO_ALLOWED_HOSTS` | разрешённые домены через запятую | `localhost,127.0.0.1` |
-| `DJANGO_CSRF_TRUSTED_ORIGINS` | доверенные HTTPS-источники для CSRF | пусто |
-| `DATABASE_URL` | адрес БД; не задана — SQLite | не задавать |
+| Переменная | Назначение | Значение для локального запуска |
+|------------|------------|---------------------------------|
+| DJANGO_SECRET_KEY | секретный ключ, обязателен | создается командой make_env.py |
+| DJANGO_DEBUG | режим отладки; в облаке всегда false | true |
+| DJANGO_ALLOWED_HOSTS | разрешенные адреса через запятую | localhost,127.0.0.1 |
+| DJANGO_CSRF_TRUSTED_ORIGINS | разрешенные HTTPS-адреса для форм | пусто |
+| DATABASE_URL | адрес базы; если не задан - SQLite | не задавать |
 
-Подробности и безопасные способы генерации ключа — в
-[docs/deployment.md](docs/deployment.md).
+Значения для Render - в [docs/deployment.md](docs/deployment.md).
 
 ## Запуск
 
@@ -122,43 +110,36 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
-`seed_lab_data` создаёт 3 категории, 3 вида оборудования и пользователей
-`student1`, `student2` с указанным паролем (команда повторяемая — дубликатов
-не будет). Адреса страниц:
+seed_lab_data создает 3 категории, 3 вида оборудования и пользователей student1 и student2.
+Повторный запуск дубликатов не создает.
 
-| Адрес | Что открывается |
-|-------|-----------------|
+| Адрес | Страница |
+|-------|----------|
 | http://127.0.0.1:8000/accounts/login/ | вход |
 | http://127.0.0.1:8000/ | заявки |
 | http://127.0.0.1:8000/reservations/ | бронирование оборудования |
-| http://127.0.0.1:8000/admin/ | административная панель |
-| http://127.0.0.1:8000/healthz/ | проверка работоспособности |
+| http://127.0.0.1:8000/admin/ | админ-панель |
+| http://127.0.0.1:8000/healthz/ | проверка сервера |
 
 ## Проверка
 
-1. UI: войти как `student1`, создать бронирование на странице
-   `/reservations/` — появляется сообщение об успехе, список обновляется
-   без перезагрузки.
-2. API: в DevTools → Network виден `POST /api/reservations/` со статусом
-   `201`; `GET /api/reservations/` возвращает созданную запись.
-3. БД: после перезапуска сервера и обновления страницы запись остаётся;
-   либо `python manage.py shell -c "from accounts.models import EquipmentReservation as R; print(R.objects.count())"`.
-4. Автоматически: `python manage.py test accounts` (21 тест) или
-   полный сценарий `bash scripts/verify_clean_start.sh`.
+1. Интерфейс: войдите как student1 и создайте бронирование - появится сообщение об успехе.
+2. API: в браузере на вкладке Network виден POST /api/reservations/ с кодом 201.
+3. База: после перезапуска сервера бронирование остается на месте.
+4. Автотесты: python manage.py test accounts (21 тест) или bash scripts/verify_clean_start.sh.
 
-## Развёртывание
+## Развертывание
 
-Публикация на Render (Web Service + PostgreSQL), переменные окружения,
-миграции, статика и проверка — [docs/deployment.md](docs/deployment.md).
-Локальная SQLite и облачная PostgreSQL — разные базы, данные между
-ними не переносятся автоматически (см. [docs/backup-restore.md](docs/backup-restore.md)).
+Публикация на Render (Web Service и PostgreSQL) - в [docs/deployment.md](docs/deployment.md).
+Локальная SQLite и PostgreSQL на Render - разные базы, данные между ними сами не переносятся
+(см. [docs/backup-restore.md](docs/backup-restore.md)).
 
-## Дополнительные инструменты (повышенный уровень)
+## Дополнительные инструменты
 
-| Возможность | Как использовать | Подробнее |
-|-------------|------------------|-----------|
-| Автогенерация описания API (справочник + OpenAPI 3.0, контрактные тесты) | `python manage.py generate_api_docs` | [api-reference.md](docs/api-reference.md) |
-| Проверка документации в CI (SQLite, Python 3.12/3.13, PostgreSQL 16) | `.github/workflows/ci.yml`; локально `python scripts/ci_local.py` | [ci-and-releases.md](docs/ci-and-releases.md) |
-| Сценарий восстановления данных | `python scripts/backup_restore.py backup / verify / restore / check` | [backup-restore.md](docs/backup-restore.md) |
-| Автоматическая проверка чистого запуска | `bash scripts/verify_clean_start.sh` | [reproducibility.md](docs/reproducibility.md) |
-| Журнал изменений релизов | [CHANGELOG.md](CHANGELOG.md), `python scripts/release_notes.py --check` | [ci-and-releases.md](docs/ci-and-releases.md) |
+| Инструмент | Команда | Подробнее |
+|------------|---------|-----------|
+| Описание API из кода | python manage.py generate_api_docs | [api-reference.md](docs/api-reference.md) |
+| Проверка документации в CI | python scripts/check_docs.py, локально python scripts/ci_local.py | [ci-and-releases.md](docs/ci-and-releases.md) |
+| Резервная копия и восстановление | python scripts/backup_restore.py backup / verify / restore / check | [backup-restore.md](docs/backup-restore.md) |
+| Проверка запуска с нуля | bash scripts/verify_clean_start.sh | [reproducibility.md](docs/reproducibility.md) |
+| Журнал изменений | python scripts/release_notes.py --check | [CHANGELOG.md](CHANGELOG.md) |
